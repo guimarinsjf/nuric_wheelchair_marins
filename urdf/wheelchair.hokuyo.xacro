@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<robot name="sensor_hokuyo"
+  xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+  xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+  xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+  xmlns:xacro="http://ros.org/wiki/xacro">
+
+ <xacro:macro name="wheelchair_hokuyo" params="parent roll pitch yaw x y z">
+  <joint name="hokuyo_joint" type="fixed">
+    <axis xyz="0 0 1" />
+    <origin xyz="${x} ${y} ${z}" rpy="${roll} ${pitch} ${yaw}"/>
+    <!--origin xyz="0 0.22 0.05" rpy="0 0 1.570796"/-->
+    <parent link="${parent}"/>
+    <child link="laser_joint"/>
+  </joint>
+
+  <link name="laser_joint">
+   <collision>
+     <origin xyz="0 0 0" rpy="0 0 0"/>
+     <geometry>
+        <box size="0.1 0.1 0.1"/>
+     </geometry>
+   </collision>
+   <!-- <visual>
+     <origin xyz="0 0 0" rpy="0 0 0"/>
+     <geometry>
+       <mesh filename="package://nuric_wheelchair_model_02/meshes/hokuyo.dae"/>
+     </geometry>
+   </visual> -->
+   <inertial>
+     <mass value="1e-5" />
+     <origin xyz="0 0 0" rpy="0 0 0"/>
+     <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+   </inertial>
+ </link>
+
+  <gazebo reference="laser_joint">
+    <sensor type="camera" name="camera1">
+      <update_rate>20.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>1.7962634</horizontal_fov>
+        <image>
+          <width>1000</width>
+          <height>500</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>30</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise is sampled independently per pixel on each frame.
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1]. -->
+          <mean>0.0</mean>
+          <stddev>0.002</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>rrbot/camera1</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera_link</frameName>
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.2</distortionK1>
+        <distortionK2>0.1</distortionK2>
+        <distortionK3>0.1</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+
+ </xacro:macro>
+  </robot>
